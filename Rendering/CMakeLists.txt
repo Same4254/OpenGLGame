@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.8)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -24,7 +24,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
-add_library(Rendering src/glad.c src/Shader.cpp)
+add_library(Rendering  src/Shader.cpp src/glad.c)
 
 target_include_directories(Rendering PUBLIC ${PROJECT_SOURCE_DIR}/Rendering/include)
 

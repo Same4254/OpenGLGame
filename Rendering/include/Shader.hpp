@@ -12,8 +12,10 @@ private:
 
 public:
 	Shader(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
-	
+	~Shader();
+
 	void Use() const;
+	void UnUse() const;
 
 	unsigned int GetProgramID() const;
 };

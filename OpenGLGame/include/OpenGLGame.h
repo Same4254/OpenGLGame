@@ -8,3 +8,6 @@
 #include <streambuf>
 
 #include "Rendering.h"
+#include "Shader.hpp"
+#include <Utils.hpp>
+#include <vector>
