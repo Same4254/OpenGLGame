@@ -166,21 +166,33 @@ int main() {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindVertexArray(0);
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	//glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 	Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	//glm::mat4 model = glm::mat4(1.0f);
 
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(-0.5f, -0.5f, -5.0f));
+	//glm::mat4 view = glm::mat4(1.0f);
+	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+
+	//Mat4f view;
+	//view.identity();
+
+	//view = Utils::translate(view, { 0.0f, 0.0f, -1.0f });
+
+	Mat4f view;
+	view.identity();
+
+	//view = Utils::translate(view, { -0.5f, -0.5f, 5.0f });
+	view = Utils::translate(view, { 0.0f, 0.0f, -5.0f });
 
 	Mat4f model;
 	model.identity();
+	model = Utils::translate(model, { 1.0f, 0.0f, -5.0f });
 
 	int projectionLoc = glGetUniformLocation(shader.GetProgramID(), "projection");
 	int modelLoc = glGetUniformLocation(shader.GetProgramID(), "model");
@@ -200,7 +212,8 @@ int main() {
 	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
 
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+	//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
 
 	glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
 	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
@@ -212,16 +225,17 @@ int main() {
 		glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		shader.Use();
+		float currentTime = (float) glfwGetTime();
+		float deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
 
-		float deltaTime = (float)glfwGetTime() - lastTime;
-		lastTime = (float)glfwGetTime();
+		shader.Use();
 		
 		//model = glm::rotate(model, glm::radians(-100.0f * deltaTime), glm::vec3(1.0f, 0.0f, 1.0f));
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-		model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-100.0f * deltaTime));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
+		//model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-20.0f * deltaTime));
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

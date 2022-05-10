@@ -51,16 +51,16 @@ namespace Utils {
 		rotationMatrix[14] = 0;
 		rotationMatrix[15] = 1;
 
-		return rotationMatrix * matrix;
+		return matrix * rotationMatrix;
 	}
 
 	Mat4f translate(const Mat4f& matrix, const Vec3f& translation) {
 		Mat4f translationMatrix;
 		translationMatrix.identity();
 
-		translationMatrix[3] = translation[0];
-		translationMatrix[7] = translation[1];
-		translationMatrix[11] = translation[2];
+		translationMatrix[12] = translation[0];
+		translationMatrix[13] = translation[1];
+		translationMatrix[14] = translation[2];
 
 		return matrix * translationMatrix;
 	}
