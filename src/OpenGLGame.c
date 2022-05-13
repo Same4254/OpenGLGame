@@ -5,8 +5,8 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-	if(severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-		std::cout << "[OpenGL Error](" << type << ") " << message << std::endl;
+	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		printf("[OpenGL Error](%s):%s\n", type, message);
 }
 
 int main() {
@@ -22,7 +22,8 @@ int main() {
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "The Betterest Game", NULL, NULL);
 	if (window == NULL) {
-		std::cout << "Failed to create GLFW window" << std::endl;
+		//std::cout << "Failed to create GLFW window" << std::endl;
+		printf("Failed to create GLFW window\n");
 		glfwTerminate();
 		return -1;
 	}
@@ -30,7 +31,8 @@ int main() {
 	glfwMakeContextCurrent(window);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "Failed to initialize OpenGL context" << std::endl;
+		//std::cout << "Failed to initialize OpenGL context" << std::endl;
+		printf("Failed to initialize OpenGL context\n");
 		return -1;
 	}
 
@@ -144,7 +146,9 @@ int main() {
 	 1.0f, 1.0f, 1.0f,  0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,
 	};
 
-	Shader shader("Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
+	//Shader shader("Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
+	Shader shader;
+	Rendering_CreateShader(&shader, "Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
@@ -172,7 +176,10 @@ int main() {
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	//glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-	Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	//Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+	float proj[16];
+	Utils_Matrix4_CalculatePerspective(proj, Utils_DegreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	//glm::mat4 model = glm::mat4(1.0f);
 
@@ -184,39 +191,49 @@ int main() {
 
 	//view = Utils::translate(view, { 0.0f, 0.0f, -1.0f });
 
-	Mat4f view;
-	view.identity();
+	float view[16];
+	Utils_Matrix4_Identity_Mutable(view);
+
+	//Mat4f view;
+	//view.identity();
 
 	//view = Utils::translate(view, { -0.5f, -0.5f, 5.0f });
-	view = Utils::translate(view, { 0.0f, 0.0f, -5.0f });
+	//view = Utils::translate(view, { 0.0f, 0.0f, -5.0f });
 
-	Mat4f model;
-	model.identity();
-	model = Utils::translate(model, { 1.0f, 0.0f, -5.0f });
+	//Mat4f model;
+	//model.identity();
+	//model = Utils::translate(model, { 1.0f, 0.0f, -5.0f });
+	float translation[3] = { 0.0f, 0.0f, -5.0f };
 
-	int projectionLoc = glGetUniformLocation(shader.GetProgramID(), "projection");
-	int modelLoc = glGetUniformLocation(shader.GetProgramID(), "model");
-	int viewLoc = glGetUniformLocation(shader.GetProgramID(), "view");
+	float model[16];
+	Utils_Matrix4_Identity_Mutable(model);
+	Utils_Matrix4_Translate_Mutable(model, translation);
 
-	int lightPosLoc = glGetUniformLocation(shader.GetProgramID(), "lightPos");
-	int lightColorLoc = glGetUniformLocation(shader.GetProgramID(), "lightColor");
+	int projectionLoc = glGetUniformLocation(shader.programID, "projection");
+	int modelLoc = glGetUniformLocation(shader.programID, "model");
+	int viewLoc = glGetUniformLocation(shader.programID, "view");
 
-	shader.Use();
+	int lightPosLoc = glGetUniformLocation(shader.programID, "lightPos");
+	int lightColorLoc = glGetUniformLocation(shader.programID, "lightColor");
 
-	glm::vec3 lightPos(2.0f, 3.0f, 0.0f);
-	glm::vec3 lightColor(1.0f,1.0f, 0.7f);
+	//shader.Use();
+	glUseProgram(shader.programID);
+
+	float lightPos[3] = { 2.0f, 3.0f, 0.0f };
+	float lightColor[3] = { 1.0f,1.0f, 0.7f };
 
 	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(proj));
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj2.data());
+	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj2.data());
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj);
 
 	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
 
 	//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data());
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
 
-	glUniform3fv(lightPosLoc, 1, glm::value_ptr(lightPos));
-	glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+	glUniform3fv(lightPosLoc, 1, lightPos);
+	glUniform3fv(lightColorLoc, 1, lightColor);
 
 	float lastTime = 0.0f;
 
@@ -229,13 +246,18 @@ int main() {
 		float deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		shader.Use();
+		//shader.Use();
+		glUseProgram(shader.programID);
 		
 		//model = glm::rotate(model, glm::radians(-100.0f * deltaTime), glm::vec3(1.0f, 0.0f, 1.0f));
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		//model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-20.0f * deltaTime));
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
+
+		float axis[3] = { 1.0f, 0.0f, 1.0f };
+		Utils_Matrix4_Rotate_Mutable(model, axis, Utils_DegreesToRadians(-20.0f * deltaTime));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -245,6 +267,8 @@ int main() {
 	}
 
 	glfwTerminate();
+
+	Rendering_FreeShader(&shader);
 
 	return 0;
 }
