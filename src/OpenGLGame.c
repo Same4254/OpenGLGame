@@ -6,7 +6,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-		printf("[OpenGL Error](%s):%s\n", type, message);
+		printf("[OpenGL Error](%d):%s\n", type, message);
 }
 
 int main() {
@@ -148,7 +148,7 @@ int main() {
 
 	//Shader shader("Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
 	Shader shader;
-	Rendering_CreateShader(&shader, "Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
+	Rendering_Shader_Initialize(&shader, "Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
@@ -178,8 +178,8 @@ int main() {
 	//glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 	//Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-	float proj[16];
-	Utils_Matrix4_CalculatePerspective(proj, Utils_DegreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	Mat4f proj;
+	Utils_Matrix4_CalculatePerspective(&proj, Utils_DegreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	//glm::mat4 model = glm::mat4(1.0f);
 
@@ -191,8 +191,11 @@ int main() {
 
 	//view = Utils::translate(view, { 0.0f, 0.0f, -1.0f });
 
-	float view[16];
-	Utils_Matrix4_Identity_Mutable(view);
+	Mat4f view;
+	Utils_Matrix4_Identity_Mutable(&view);
+
+	Camera camera;
+	Rendering_Camera_Initialize(&camera);
 
 	//Mat4f view;
 	//view.identity();
@@ -203,11 +206,14 @@ int main() {
 	//Mat4f model;
 	//model.identity();
 	//model = Utils::translate(model, { 1.0f, 0.0f, -5.0f });
-	float translation[3] = { 0.0f, 0.0f, -5.0f };
+	Vec3f translation = { 2.0f, 0.0f, -5.0f };
+	Rendering_Camera_LookAtTarget(&camera, &translation);
 
-	float model[16];
-	Utils_Matrix4_Identity_Mutable(model);
-	Utils_Matrix4_Translate_Mutable(model, translation);
+	Rendering_Camera_CalculateViewMatrix(&view, &camera);
+
+	Mat4f model;
+	Utils_Matrix4_Identity_Mutable(&model);
+	Utils_Matrix4_Translate_Mutable(&model, &translation);
 
 	int projectionLoc = glGetUniformLocation(shader.programID, "projection");
 	int modelLoc = glGetUniformLocation(shader.programID, "model");
@@ -219,21 +225,21 @@ int main() {
 	//shader.Use();
 	glUseProgram(shader.programID);
 
-	float lightPos[3] = { 2.0f, 3.0f, 0.0f };
-	float lightColor[3] = { 1.0f,1.0f, 0.7f };
+	Vec3f lightPos = { 2.0f, 3.0f, 0.0f };
+	Vec3f lightColor = { 1.0f,1.0f, 0.7f };
 
 	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(proj));
 	//glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj2.data());
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj);
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj.data);
 
 	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 
 	//glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view);
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 
-	glUniform3fv(lightPosLoc, 1, lightPos);
-	glUniform3fv(lightColorLoc, 1, lightColor);
+	glUniform3fv(lightPosLoc, 1, lightPos.data);
+	glUniform3fv(lightColorLoc, 1, lightColor.data);
 
 	float lastTime = 0.0f;
 
@@ -255,9 +261,9 @@ int main() {
 		//model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-20.0f * deltaTime));
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
 
-		float axis[3] = { 1.0f, 0.0f, 1.0f };
-		Utils_Matrix4_Rotate_Mutable(model, axis, Utils_DegreesToRadians(-20.0f * deltaTime));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model);
+		Vec3f axis = { 1.0f, 0.0f, 1.0f };
+		Utils_Matrix4_Rotate_Mutable(&model, &axis, Utils_DegreesToRadians(-20.0f * deltaTime));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -268,7 +274,7 @@ int main() {
 
 	glfwTerminate();
 
-	Rendering_FreeShader(&shader);
+	Rendering_Shader_FreeContent(&shader);
 
 	return 0;
 }

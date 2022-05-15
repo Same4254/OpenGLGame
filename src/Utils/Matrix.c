@@ -9,7 +9,7 @@ float Utils_Magnitude(const float *v, size_t length) {
 
 // Immutable
 
-float* Utils_Scale(const float *m, const float scalar, float *output, size_t length) {
+float* Utils_Scale(const float *m, float scalar, float *output, size_t length) {
 	for (size_t i = 0; i < length; i++)
 		output[i] = scalar * m[i];
 
@@ -63,7 +63,7 @@ float* Utils_Normalize_Mutable(float *v, size_t length) {
 	return Utils_Normalize(v, v, length);
 }
 
-float* Utils_Copy(float *dest, const float *src, size_t length) {
+float* Utils_Copy_Mutable(float *dest, const float *src, size_t length) {
 	memcpy(dest, src, sizeof(float) * length);
 
 	return dest;
@@ -78,94 +78,112 @@ float* Utils_SetAll(float *m, float value, size_t length) {
 
 //******* Vector 3 *******//
 
-float  Utils_Vector3_Dot(const float *v1, const float *v2) {
-	return Utils_Dot(v1, v2, VEC3_LENGTH);
+float  Utils_Vector3_Dot(const Vec3f *v1, const Vec3f *v2) {
+	return Utils_Dot(v1->data, v2->data, VEC3_LENGTH);
 }
 
 // Immutable
 
-float* Utils_Vector3_Scale(const float *v, const float scalar, float *output) {
-	return Utils_Scale(v, scalar, output, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Scale(const Vec3f *v, float scalar, Vec3f *output) {
+	Utils_Scale(v->data, scalar, output->data, VEC3_LENGTH);
+
+	return output;
 }
 
-float* Utils_Vector3_Add(const float *v1, const float *v2, float *output) {
-	return Utils_Add(v1, v2, output, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Add(const Vec3f *v1, const Vec3f *v2, Vec3f *output) {
+	Utils_Add(v1->data, v2->data, output->data, VEC3_LENGTH);
+
+	return output;
 }
 
-float* Utils_Vector3_Subtract(const float *v1, const float *v2, float *output) {
-	return Utils_Subtract(v1, v2, output, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Subtract(const Vec3f *v1, const Vec3f *v2, Vec3f *output) {
+	Utils_Subtract(v1->data, v2->data, output->data, VEC3_LENGTH);
+
+	return output;
 }
 
-float* Utils_Vector3_Normalize(const float *v, float *output) {
-	return Utils_Normalize(v, output, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Normalize(const Vec3f *v, Vec3f *output) {
+	Utils_Normalize(v->data, output->data, VEC3_LENGTH);
+
+	return output;
 }
 
-float* Utils_Vector3_Cross(const float *v1, const float *v2, float *output) {
-	output[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
-	output[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
-	output[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+Vec3f* Utils_Vector3_Cross(const Vec3f *v1, const Vec3f *v2, Vec3f *output) {
+	output->x = (v1->y * v2->z) - (v1->z * v2->y);
+	output->y = (v1->z * v2->x) - (v1->x * v2->z);
+	output->z = (v1->x * v2->y) - (v1->y * v2->x);
 
 	return output;
 }
 
 // Mutable
 
-float* Utils_Vector3_Scale_Mutable(float *v, const float scalar) {
-	return Utils_Scale(v, scalar, v, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Scale_Mutable(Vec3f *v, float scalar) {
+	Utils_Scale(v->data, scalar, v->data, VEC3_LENGTH);
+	return v;
 }
 
-float* Utils_Vector3_Add_Mutable(float *v1, const float *v2) {
-	return Utils_Add(v1, v2, v1, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Add_Mutable(Vec3f *v1, const Vec3f *v2) {
+	Utils_Add(v1->data, v2->data, v1->data, VEC3_LENGTH);
+	return v1;
 }
 
-float* Utils_Vector3_Subtract_Mutable(float *v1, const float *v2) {
-	return Utils_Subtract(v1, v2, v1, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Subtract_Mutable(Vec3f *v1, const Vec3f *v2) {
+	Utils_Subtract(v1->data, v2->data, v1->data, VEC3_LENGTH);
+	return v1;
 }
 
-float* Utils_Vector3_Normalize_Mutable(float *v) {
-	return Utils_Normalize(v, v, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Normalize_Mutable(Vec3f *v) {
+	Utils_Normalize(v->data, v->data, VEC3_LENGTH);
+	return v;
 }
 
-float* Utils_Vector3_CrossL(float *v1, const float *v2) {
-	float temp[3];
+Vec3f* Utils_Vector3_CrossL(Vec3f *v1, const Vec3f *v2) {
+	Vec3f temp;
 
-	Utils_Vector3_Cross(v1, v2, temp);
+	Utils_Vector3_Cross(v1, v2, &temp);
+	Utils_Vector3_Copy(v1, &temp);
 
-	return Utils_Vector3_Copy(v1, temp);
+	return v1;
 }
 
-float* Utils_Vector3_CrossR(float *v1, const float *v2) {
-	float temp[3];
+Vec3f* Utils_Vector3_CrossR(const Vec3f *v1, Vec3f *v2) {
+	Vec3f temp;
 
-	Utils_Vector3_Cross(v1, v2, temp);
+	Utils_Vector3_Cross(v1, v2, &temp);
+	Utils_Vector3_Copy(v2, &temp);
 
-	return Utils_Vector3_Copy(v2, temp);
+	return v2;
 }
 
-float* Utils_Vector3_Copy(float *dest, const float *src) {
-	return Utils_Copy(dest, src, VEC3_LENGTH);
+Vec3f* Utils_Vector3_Copy(Vec3f *dest, const Vec3f *src) {
+	Utils_Copy_Mutable(dest->data, src->data, VEC3_LENGTH);
+
+	return dest;
 }
 
-float* Utils_Vector3_SetAll(float *m, float value) {
-	return Utils_SetAll(m, value, VEC3_LENGTH);
+Vec3f* Utils_Vector3_SetAll(Vec3f *m, float value) {
+	Utils_SetAll(m->data, value, VEC3_LENGTH);
+
+	return m;
 }
 
 //******* Mat 4 *******//
 
 // Immutable
 
-float* Utils_Matrix4_Multiply(const float *m1, const float *m2, float *output) {
+Mat4f* Utils_Matrix4_Multiply(const Mat4f *m1, const Mat4f *m2, Mat4f *output) {
 	size_t resultIndex = 0;
 	for (size_t colStartIndex = 0; colStartIndex < MAT4_LENGTH; colStartIndex += MAT4_ROWS) {
 		for (size_t rowStartIndex = 0; rowStartIndex < MAT4_ROWS; rowStartIndex++) {
 			float sum = 0;
 			size_t rightIndex = colStartIndex;
 			for (size_t leftIndex = 0; leftIndex < MAT4_LENGTH; leftIndex += MAT4_ROWS) {
-				sum += m1[leftIndex + rowStartIndex] * m2[rightIndex];
+				sum += m1->data[leftIndex + rowStartIndex] * m2->data[rightIndex];
 				rightIndex ++;
 			}
 
-			output[resultIndex] = sum;
+			output->data[resultIndex] = sum;
 			resultIndex++;
 		}
 	}
@@ -173,11 +191,11 @@ float* Utils_Matrix4_Multiply(const float *m1, const float *m2, float *output) {
 	return output;
 }
 
-float* Utils_Matrix4_Transpose(const float *m, float *output) {
+Mat4f* Utils_Matrix4_Transpose(const Mat4f *m, Mat4f *output) {
 	size_t resultIndex = 0;
 	for (size_t colStartIndex = 0; colStartIndex < MAT4_COLS; colStartIndex++) {
 		for (size_t index = colStartIndex; index < MAT4_LENGTH; index += MAT4_COLS) {
-			output[resultIndex] = m[index];
+			output->data[resultIndex] = m->data[index];
 			resultIndex++;
 		}
 	}
@@ -187,112 +205,123 @@ float* Utils_Matrix4_Transpose(const float *m, float *output) {
 
 // Mutable
 
-float* Utils_Matrix4_Identity_Mutable(float *m) {
-	for (size_t i = 0; i < MAT4_LENGTH; i++)
-		m[i] = 0;
+Mat4f* Utils_Matrix4_Identity_Mutable(Mat4f *m) {
+	Utils_Matrix4_SetAll(m, 0.0f);
 
-	m[0] = 1;
-	m[5] = 1;
-	m[10] = 1;
-	m[15] = 1;
+	m->data[0] = 1;
+	m->data[5] = 1;
+	m->data[10] = 1;
+	m->data[15] = 1;
 
 	return m;
 }
 
-float* Utils_Matrix4_MultiplyL(float *m1, const float *m2) {
-	float temp[16];
+Mat4f* Utils_Matrix4_MultiplyL(Mat4f *m1, const Mat4f *m2) {
+	Mat4f temp;
 
-	Utils_Matrix4_Multiply(m1, m2, temp);
-	return Utils_Matrix4_Copy(m1, temp);
+	Utils_Matrix4_Multiply(m1, m2, &temp);
+	Utils_Matrix4_Copy(m1, &temp);
+
+	return m1;
 }
 
-float* Utils_Matrix4_MultiplyR(const float *m1, float *m2) {
-	float temp[16];
+Mat4f* Utils_Matrix4_MultiplyR(const Mat4f *m1, Mat4f *m2) {
+	Mat4f temp;
 
-	Utils_Matrix4_Multiply(m1, m2, temp);
-	return Utils_Matrix4_Copy(m2, temp);
+	Utils_Matrix4_Multiply(m1, m2, &temp);
+	Utils_Matrix4_Copy(m2, &temp);
+
+	return m2;
 }
 
-float* Utils_Matrix4_Transpose_Mutable(float *m) {
-	float temp[16];
+Mat4f* Utils_Matrix4_Transpose_Mutable(Mat4f *m) {
+	Mat4f temp;
 
-	Utils_Matrix4_Transpose(m, temp);
+	Utils_Matrix4_Transpose(m, &temp);
+	Utils_Matrix4_Copy(m, &temp);
 
-	return Utils_Matrix4_Copy(m, temp);
+	return m;
 }
 
-float* Utils_Matrix4_Copy(float *dest, const float *src) {
-	memcpy(dest, src, sizeof(float) * 16);
+Mat4f* Utils_Matrix4_Copy(Mat4f *dest, const Mat4f *src) {
+	memcpy(dest->data, src->data, sizeof(float) * 16);
 
 	return dest;
 }
 
-float* Utils_Matrix4_SetAll(float *m, float value) {
-	return Utils_SetAll(m, value, MAT4_LENGTH);
+Mat4f* Utils_Matrix4_SetAll(Mat4f *m, float value) {
+	Utils_SetAll(m->data, value, MAT4_LENGTH);
+
+	return m;
 }
 
-void Utils_Matrix4_CalculatePerspective(float *matrix, float fovRadians, float aspectRatio, float near, float far) {
+void Utils_Matrix4_CalculatePerspective(Mat4f *matrix, float fovRadians, float aspectRatio, float near, float far) {
 	Utils_Matrix4_SetAll(matrix, 0.0f);
 
-	matrix[0] = 1.0f / (aspectRatio * tanf(fovRadians / 2.0f));
-	matrix[5] = 1.0f / tanf(fovRadians / 2.0f);
-	matrix[10] = (-(far + near)) / (far - near);
+	matrix->data[0] = 1.0f / (aspectRatio * tanf(fovRadians / 2.0f));
+	matrix->data[5] = 1.0f / tanf(fovRadians / 2.0f);
+	matrix->data[10] = (-(far + near)) / (far - near);
 
-	matrix[11] = -1.0f;
-	matrix[14] = (-(2.0f * far * near) / (far - near));
+	matrix->data[11] = -1.0f;
+	matrix->data[14] = (-(2.0f * far * near) / (far - near));
+}
+
+Mat4f* Utils_Matrix4_Rotate(const Mat4f *matrix, const Vec3f *unormalizedAxis, float theta, Mat4f *output) {
+	Vec3f axis;
+
+	Utils_Vector3_Normalize(unormalizedAxis, &axis);
+
+	Mat4f rotationMatrix;
+
+	rotationMatrix.data[0] = cosf(theta) + axis.x * axis.x * (1.0f - cosf(theta));
+	rotationMatrix.data[1] = axis.x * axis.y * (1.0f - cosf(theta)) + axis.z * sinf(theta);
+	rotationMatrix.data[2] = axis.x * axis.z * (1.0f - cosf(theta)) - axis.y * sinf(theta);
+	rotationMatrix.data[3] = 0;
+
+	rotationMatrix.data[4] = axis.x * axis.y * (1.0f - cosf(theta)) - axis.z * sinf(theta);
+	rotationMatrix.data[5] = cosf(theta) + axis.y * axis.y * (1.0f - cosf(theta));
+	rotationMatrix.data[6] = axis.y * axis.z * (1.0f - cosf(theta)) + axis.x * sinf(theta);
+	rotationMatrix.data[7] = 0;
+
+	rotationMatrix.data[8] = axis.x * axis.z * (1.0f - cosf(theta)) + axis.y * sinf(theta);
+	rotationMatrix.data[9] = axis.y * axis.z * (1.0f - cosf(theta)) - axis.x * sinf(theta);
+	rotationMatrix.data[10] = cosf(theta) + axis.x * axis.x * (1.0f - cosf(theta));
+	rotationMatrix.data[11] = 0;
+
+	rotationMatrix.data[12] = 0;
+	rotationMatrix.data[13] = 0;
+	rotationMatrix.data[14] = 0;
+	rotationMatrix.data[15] = 1;
+
+	Utils_Matrix4_Multiply(matrix, &rotationMatrix, output);
+
+	return output;
+}
+
+Mat4f* Utils_Matrix4_Translate(const Mat4f *matrix, const Vec3f *translation, Mat4f *output) {
+	Mat4f translationMatrix;
+	Utils_Matrix4_Identity_Mutable(&translationMatrix);
+
+	Utils_Copy_Mutable(&translationMatrix.data[12], translation->data, VEC3_LENGTH);
+	Utils_Matrix4_Multiply(matrix, &translationMatrix, output);
+
+	return output;
+}
+
+Mat4f* Utils_Matrix4_Rotate_Mutable(Mat4f *matrix, const Vec3f *unormalizedAxis, float theta) {
+	Mat4f temp;
+
+	Utils_Matrix4_Rotate(matrix, unormalizedAxis, theta, &temp);
+	Utils_Matrix4_Copy(matrix, &temp);
 
 	return matrix;
 }
 
-float* Utils_Matrix4_Rotate(const float *matrix, const float *unormalizedAxis, float theta, float *output) {
-	float axis[3];
+Mat4f* Utils_Matrix4_Translate_Mutable(Mat4f *matrix, const Vec3f *translation) {
+	Mat4f temp;
 
-	Utils_Vector3_Normalize(unormalizedAxis, axis);
+	Utils_Matrix4_Translate(matrix, translation, &temp);
+	Utils_Matrix4_Copy(matrix, &temp);
 
-	float rotationMatrix[16];
-
-	rotationMatrix[0] = cos(theta) + axis[0] * axis[0] * (1.0f - cos(theta));
-	rotationMatrix[1] = axis[0] * axis[1] * (1.0f - cos(theta)) + axis[2] * sin(theta);
-	rotationMatrix[2] = axis[0] * axis[2] * (1.0f - cos(theta)) - axis[1] * sin(theta);
-	rotationMatrix[3] = 0;
-
-	rotationMatrix[4] = axis[0] * axis[1] * (1.0f - cos(theta)) - axis[2] * sin(theta);
-	rotationMatrix[5] = cos(theta) + axis[1] * axis[1] * (1.0f - cos(theta));
-	rotationMatrix[6] = axis[1] * axis[2] * (1.0f - cos(theta)) + axis[0] * sin(theta);
-	rotationMatrix[7] = 0;
-
-	rotationMatrix[8] = axis[0] * axis[2] * (1.0f - cos(theta)) + axis[1] * sin(theta);
-	rotationMatrix[9] = axis[1] * axis[2] * (1.0f - cos(theta)) - axis[0] * sin(theta);
-	rotationMatrix[10] = cos(theta) + axis[0] * axis[0] * (1.0f - cos(theta));
-	rotationMatrix[11] = 0;
-
-	rotationMatrix[12] = 0;
-	rotationMatrix[13] = 0;
-	rotationMatrix[14] = 0;
-	rotationMatrix[15] = 1;
-
-	return Utils_Matrix4_Multiply(matrix, rotationMatrix, output);
-}
-
-float* Utils_Matrix4_Translate(const float *matrix, const float *translation, float *output) {
-	float translationMatrix[16];
-	Utils_Matrix4_Identity_Mutable(translationMatrix);
-
-	Utils_Vector3_Copy(&translationMatrix[12], translation);
-
-	return Utils_Matrix4_Multiply(matrix, translationMatrix, output);
-}
-
-float* Utils_Matrix4_Rotate_Mutable(float *matrix, const float *unormalizedAxis, float theta) {
-	float temp[16];
-
-	Utils_Matrix4_Rotate(matrix, unormalizedAxis, theta, temp);
-	return Utils_Matrix4_Copy(matrix, temp);
-}
-
-float* Utils_Matrix4_Translate_Mutable(float *matrix, const float *translation) {
-	float temp[16];
-
-	Utils_Matrix4_Translate(matrix, translation, temp);
-	return Utils_Matrix4_Copy(matrix, temp);
+	return matrix;
 }

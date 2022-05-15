@@ -11,9 +11,30 @@
 
 #define VEC3_LENGTH 3
 
+#define VEC4_LENGTH 4
+
 #define MAT4_LENGTH 16
 #define MAT4_ROWS 4
 #define MAT4_COLS 4
+
+#define MAT4_COL_1 0
+#define MAT4_COL_2 4
+#define MAT4_COL_3 8
+#define MAT4_COL_4 12
+
+typedef union {
+	struct {
+		float x;
+		float y;
+		float z;
+	};
+
+	float data[VEC3_LENGTH];
+} Vec3f;
+
+typedef struct {
+	float data[MAT4_LENGTH];
+} Mat4f;
 
 //*************************** Math ***************************//
 
@@ -27,7 +48,7 @@ extern float Utils_Dot(const float *m1, const float *m2, size_t length);
 
 // Immutable
 
-extern float* Utils_Scale(const float *m, const float scalar, float *output, size_t length);
+extern float* Utils_Scale(const float *m, float scalar, float *output, size_t length);
 extern float* Utils_Add(const float *m1, const float *m2, float *output, size_t length);
 extern float* Utils_Subtract(const float *m1, const float *m2, float *output, size_t length);
 
@@ -46,59 +67,59 @@ extern float* Utils_SetAll(float *m, float value, size_t length);
 
 //******* Vector 3 *******//
 
-extern float  Utils_Vector3_Dot(const float *v1, const float *v2);
+extern float  Utils_Vector3_Dot(const Vec3f *v1, const Vec3f *v2);
 
 // Immutable
 
-extern float* Utils_Vector3_Scale(const float *v, const float scalar, float *output);
-extern float* Utils_Vector3_Add(const float *v1, const float *v2, float *output);
-extern float* Utils_Vector3_Subtract(const float *v1, const float *v2, float *output);
+extern Vec3f* Utils_Vector3_Scale(const Vec3f *v, float scalar, Vec3f *output);
+extern Vec3f* Utils_Vector3_Add(const Vec3f *v1, const Vec3f *v2, Vec3f *output);
+extern Vec3f* Utils_Vector3_Subtract(const Vec3f *v1, const Vec3f *v2, Vec3f *output);
 
-extern float* Utils_Vector3_Normalize(const float *v, float *output);
+extern Vec3f* Utils_Vector3_Normalize(const Vec3f *v, Vec3f *output);
 
-extern float* Utils_Vector3_Cross(const float *v1, const float *v2, float *output);
+extern Vec3f* Utils_Vector3_Cross(const Vec3f *v1, const Vec3f *v2, Vec3f *output);
 
 // Mutable
 
-extern float* Utils_Vector3_Scale_Mutable(float *v, const float scalar);
-extern float* Utils_Vector3_Add_Mutable(float *v1, const float *v2);
-extern float* Utils_Vector3_Subtract_Mutable(float *v1, const float *v2);
+extern Vec3f* Utils_Vector3_Scale_Mutable(Vec3f *v, float scalar);
+extern Vec3f* Utils_Vector3_Add_Mutable(Vec3f *v1, const Vec3f *v2);
+extern Vec3f* Utils_Vector3_Subtract_Mutable(Vec3f *v1, const Vec3f *v2);
 
-extern float* Utils_Vector3_Normalize_Mutable(float *v);
+extern Vec3f* Utils_Vector3_Normalize_Mutable(Vec3f *v);
 
-extern float* Utils_Vector3_CrossL(float *v1, const float *v2);
-extern float* Utils_Vector3_CrossR(float *v1, const float *v2);
+extern Vec3f* Utils_Vector3_CrossL(Vec3f *v1, const Vec3f *v2);
+extern Vec3f* Utils_Vector3_CrossR(const Vec3f *v1, Vec3f *v2);
 
-extern float* Utils_Vector3_Copy(float *dest, const float *src);
-extern float* Utils_Vector3_SetAll(float *m, float value);
+extern Vec3f* Utils_Vector3_Copy(Vec3f *dest, const Vec3f *src);
+extern Vec3f* Utils_Vector3_SetAll(Vec3f *m, float value);
 
 //******* Mat4 Operations *******//
 
 // Immutable
 
-extern float* Utils_Matrix4_Multiply(const float *m1, const float *m2, float *output);
-extern float* Utils_Matrix4_Transpose(const float *m, float *output);
+extern Mat4f* Utils_Matrix4_Multiply(const Mat4f *m1, const Mat4f *m2, Mat4f *output);
+extern Mat4f* Utils_Matrix4_Transpose(const Mat4f *m, Mat4f *output);
 
 // Mutable
 
-extern float* Utils_Matrix4_Identity_Mutable(float *m);
+extern Mat4f* Utils_Matrix4_Identity_Mutable(Mat4f *m);
 
-extern float* Utils_Matrix4_MultiplyL(float *m1, const float *m2);
-extern float* Utils_Matrix4_MultiplyR(const float *m1, float *m2);
-extern float* Utils_Matrix4_Transpose_Mutable(float *m);
+extern Mat4f* Utils_Matrix4_MultiplyL(Mat4f *m1, const Mat4f *m2);
+extern Mat4f* Utils_Matrix4_MultiplyR(const Mat4f *m1, Mat4f *m2);
+extern Mat4f* Utils_Matrix4_Transpose_Mutable(Mat4f *m);
 
-extern float* Utils_Matrix4_Copy(float *dest, const float *src);
-extern float* Utils_Matrix4_SetAll(float *m, float value);
+extern Mat4f* Utils_Matrix4_Copy(Mat4f *dest, const Mat4f *src);
+extern Mat4f* Utils_Matrix4_SetAll(Mat4f *m, float value);
 
 //******* Mat4 Rendering Operations *******//
 
-extern void Utils_Matrix4_CalculatePerspective(float *matrix, float fovRadians, float aspectRatio, float near, float far);
+extern void Utils_Matrix4_CalculatePerspective(Mat4f *matrix, float fovRadians, float aspectRatio, float near, float far);
 
-extern float* Utils_Matrix4_Rotate(const float *matrix, const float *unormalizedAxis, float theta, float *output);
-extern float* Utils_Matrix4_Translate(const float *matrix, const float *translation, float *output);
+extern Mat4f* Utils_Matrix4_Rotate(const Mat4f *matrix, const Vec3f *unormalizedAxis, float theta, Mat4f *output);
+extern Mat4f* Utils_Matrix4_Translate(const Mat4f *matrix, const Vec3f *translation, Mat4f *output);
 
-extern float* Utils_Matrix4_Rotate_Mutable(float *matrix, const float *unormalizedAxis, float theta);
-extern float* Utils_Matrix4_Translate_Mutable(float *matrix, const float *translation);
+extern Mat4f* Utils_Matrix4_Rotate_Mutable(Mat4f *matrix, const Vec3f *unormalizedAxis, float theta);
+extern Mat4f* Utils_Matrix4_Translate_Mutable(Mat4f *matrix, const Vec3f *translation);
 
 //*************************** File I/O ***************************//
 

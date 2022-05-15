@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 
 project ("OpenGLGame")
 
@@ -29,7 +29,7 @@ FetchContent_MakeAvailable(glm)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_executable(OpenGLGame "src/OpenGLGame.c" "src/glad.c" "src/Utils/Utils.c" "src/Utils/Matrix.c" "src/Rendering/Shader.c" "src/Utils/FileIO.c")
+add_executable(OpenGLGame "src/OpenGLGame.c" "src/glad.c" "src/Utils/Utils.c" "src/Utils/Matrix.c" "src/Rendering/Shader.c" "src/Utils/FileIO.c" "src/Rendering/Camera.c")
 
 target_link_libraries (OpenGLGame ${OPENGL_LIBRARY} glfw glm)
 

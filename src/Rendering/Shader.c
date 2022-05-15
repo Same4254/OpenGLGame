@@ -1,8 +1,8 @@
 #include "Rendering/Rendering.h"
 
-void Rendering_CreateShader(Shader *shader, char *vertexShaderPath, char *fragmentShaderPath) {
-	shader->vertexShaderPath = strdup(vertexShaderPath);
-	shader->vertexShaderPath = strdup(fragmentShaderPath);
+void Rendering_Shader_Initialize(Shader *shader, char *vertexShaderPath, char *fragmentShaderPath) {
+	shader->vertexShaderPath = _strdup(vertexShaderPath);
+	shader->vertexShaderPath = _strdup(fragmentShaderPath);
 
 	char *vertexShaderSource = Utils_ReadFileTerminated(vertexShaderPath);
 	char *fragmentShaderSource = Utils_ReadFileTerminated(fragmentShaderPath);
@@ -52,7 +52,7 @@ void Rendering_CreateShader(Shader *shader, char *vertexShaderPath, char *fragme
 	free(fragmentShaderSource);
 }
 
-void Rendering_FreeShader(Shader *shader) {
+void Rendering_Shader_FreeContent(Shader *shader) {
 	free(shader->vertexShaderPath);
 	free(shader->fragmentShaderPath);
 
