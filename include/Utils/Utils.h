@@ -40,6 +40,7 @@ typedef struct {
 
 extern float Utils_RadiansToDegrees(float radians);
 extern float Utils_DegreesToRadians(float degrees);
+extern float Utils_CorrectATan(float x, float y);
 
 //************ Matrix/Vector Operations ************//
 
@@ -68,6 +69,7 @@ extern float* Utils_SetAll(float *m, float value, size_t length);
 //******* Vector 3 *******//
 
 extern float  Utils_Vector3_Dot(const Vec3f *v1, const Vec3f *v2);
+extern float  Utils_Vector3_Magnitude(const float *v);
 
 // Immutable
 
@@ -120,6 +122,9 @@ extern Mat4f* Utils_Matrix4_Translate(const Mat4f *matrix, const Vec3f *translat
 
 extern Mat4f* Utils_Matrix4_Rotate_Mutable(Mat4f *matrix, const Vec3f *unormalizedAxis, float theta);
 extern Mat4f* Utils_Matrix4_Translate_Mutable(Mat4f *matrix, const Vec3f *translation);
+
+extern Vec3f* Utils_TransformPoint(const Mat4f *matrix, const Vec3f *point, Vec3f *output);
+extern Vec3f* Utils_TransformPoint_Mutable(const Mat4f *matrix, Vec3f *point);
 
 //*************************** File I/O ***************************//
 

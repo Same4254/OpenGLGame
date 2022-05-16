@@ -1,5 +1,7 @@
 ﻿#include "OpenGLGame.h"
 
+Camera camera;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
@@ -7,6 +9,96 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
 	if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
 		printf("[OpenGL Error](%d):%s\n", type, message);
+}
+
+
+
+void mouse_callback(GLFWwindow* window, double xPos, double yPos) {
+	static bool first = true;
+	static double lastX, lastY;
+
+	if (first) {
+		lastX = xPos;
+		lastY = yPos;
+		first = false;
+	} else {
+		if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+			float xDiff = (float)(xPos - lastX);
+			float yDiff = (float)(yPos - lastY);
+
+			xDiff *= 0.01f;
+			yDiff *= 0.01f;
+
+			Vec3f tempRotation = { yDiff, xDiff, 0 };
+			Utils_Vector3_Add_Mutable(&camera.rotation, &tempRotation);
+
+			if (camera.rotation.x > 1.39)
+				camera.rotation.x = 1.39;
+
+			if (camera.rotation.x < -1.39)
+				camera.rotation.x = -1.39;
+
+			//Rendering_Camera_Rotate(&camera, yDiff, xDiff);
+			//Rendering_Camera_Rotate(&camera, 0, 0);
+		}
+	}
+
+	lastX = xPos;
+	lastY = yPos;
+}
+
+void processInput(GLFWwindow* window, Camera* camera, float dt) {
+	const float cameraSpeed = 5.0f * dt;
+
+	Vec3f transformedTranslation;
+	Utils_Vector3_SetAll(&transformedTranslation, 0);
+
+	Vec3f translation;
+	Utils_Vector3_SetAll(&translation, 0);
+
+	Vec3f xAxis = { 1.0f, 0.0f, 0.0f };
+	Vec3f yAxis = { 0.0f, 1.0f, 0.0f };
+	Vec3f zAxis = { 0.0f, 0.0f, 1.0f };
+
+	//ec3f cameraUp = { camera->rotation.data[MAT4_COL_1 + 1], camera->rotation.data[MAT4_COL_2 + 1], camera->rotation.data[MAT4_COL_3 + 1] };
+	//Vec3f cameraFront = { camera->rotation.data[MAT4_COL_1 + 2], camera->rotation.data[MAT4_COL_2 + 2], camera->rotation.data[MAT4_COL_3 + 2] };
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		Utils_Vector3_Subtract_Mutable(&transformedTranslation, &zAxis);
+		//Utils_Vector3_Subtract_Mutable(&translation, &cameraFront);
+	//translation += camera.getFrontDirection() * cameraSpeed;
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		Utils_Vector3_Add_Mutable(&transformedTranslation, &zAxis);
+		//Utils_Vector3_Add_Mutable(&translation, &cameraFront);
+	//translation -= camera.getFrontDirection() * cameraSpeed;
+	
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		Utils_Vector3_Add_Mutable(&translation, &xAxis);
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		Utils_Vector3_Subtract_Mutable(&translation, &xAxis);
+
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE) {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		//if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+		//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		//else
+		//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+	else {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+
+	Utils_Vector3_Scale_Mutable(&translation, -cameraSpeed);
+	Utils_Vector3_Scale_Mutable(&transformedTranslation, -cameraSpeed);
+	//Utils_Matrix4_Translate_Mutable(&camera->translation, &translation);
+
+	Rendering_Camera_TranslateInFacingDirection(camera, &transformedTranslation);
+	Rendering_Camera_TranslateInFacingDirection_NoPitch(camera, &translation);
+
+	//camera.translate(translation);
 }
 
 int main() {
@@ -35,6 +127,8 @@ int main() {
 		printf("Failed to initialize OpenGL context\n");
 		return -1;
 	}
+
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 	glDebugMessageCallback(MessageCallback, 0);
 	glViewport(0, 0, 800, 600);
@@ -179,7 +273,7 @@ int main() {
 	//Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	Mat4f proj;
-	Utils_Matrix4_CalculatePerspective(&proj, Utils_DegreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	Utils_Matrix4_CalculatePerspective(&proj, Utils_DegreesToRadians(75.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	//glm::mat4 model = glm::mat4(1.0f);
 
@@ -194,7 +288,6 @@ int main() {
 	Mat4f view;
 	Utils_Matrix4_Identity_Mutable(&view);
 
-	Camera camera;
 	Rendering_Camera_Initialize(&camera);
 
 	//Mat4f view;
@@ -206,8 +299,8 @@ int main() {
 	//Mat4f model;
 	//model.identity();
 	//model = Utils::translate(model, { 1.0f, 0.0f, -5.0f });
-	Vec3f translation = { 2.0f, 0.0f, -5.0f };
-	Rendering_Camera_LookAtTarget(&camera, &translation);
+	Vec3f translation = { 1.0f, 0.0f, -10.0f };
+	//Rendering_Camera_LookAtTarget(&camera, &translation);
 
 	Rendering_Camera_CalculateViewMatrix(&view, &camera);
 
@@ -242,6 +335,7 @@ int main() {
 	glUniform3fv(lightColorLoc, 1, lightColor.data);
 
 	float lastTime = 0.0f;
+	glfwSetTime(0);
 
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window)) {
@@ -252,6 +346,11 @@ int main() {
 		float deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
+		processInput(window, &camera, deltaTime);
+
+		Rendering_Camera_CalculateViewMatrix(&view, &camera);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
+
 		//shader.Use();
 		glUseProgram(shader.programID);
 		
@@ -261,9 +360,9 @@ int main() {
 		//model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-20.0f * deltaTime));
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
 
-		Vec3f axis = { 1.0f, 0.0f, 1.0f };
-		Utils_Matrix4_Rotate_Mutable(&model, &axis, Utils_DegreesToRadians(-20.0f * deltaTime));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
+		//Vec3f axis = { 1.0f, 0.0f, 1.0f };
+		//Utils_Matrix4_Rotate_Mutable(&model, &axis, Utils_DegreesToRadians(-20.0f * deltaTime));
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

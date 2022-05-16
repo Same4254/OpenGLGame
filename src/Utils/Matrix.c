@@ -82,6 +82,10 @@ float  Utils_Vector3_Dot(const Vec3f *v1, const Vec3f *v2) {
 	return Utils_Dot(v1->data, v2->data, VEC3_LENGTH);
 }
 
+float  Utils_Vector3_Magnitude(const float *v) {
+	return Utils_Magnitude(v, VEC3_LENGTH);
+}
+
 // Immutable
 
 Vec3f* Utils_Vector3_Scale(const Vec3f *v, float scalar, Vec3f *output) {
@@ -303,7 +307,7 @@ Mat4f* Utils_Matrix4_Translate(const Mat4f *matrix, const Vec3f *translation, Ma
 	Utils_Matrix4_Identity_Mutable(&translationMatrix);
 
 	Utils_Copy_Mutable(&translationMatrix.data[12], translation->data, VEC3_LENGTH);
-	Utils_Matrix4_Multiply(matrix, &translationMatrix, output);
+	Utils_Matrix4_Multiply(&translationMatrix, matrix, output);
 
 	return output;
 }
@@ -324,4 +328,20 @@ Mat4f* Utils_Matrix4_Translate_Mutable(Mat4f *matrix, const Vec3f *translation) 
 	Utils_Matrix4_Copy(matrix, &temp);
 
 	return matrix;
+}
+
+Vec3f* Utils_TransformPoint(const Mat4f *matrix, const Vec3f *point, Vec3f *output) {
+	output->data[0] = matrix->data[0] * point->data[0] + matrix->data[4] * point->data[1] + matrix->data[8] * point->data[2];
+	output->data[1] = matrix->data[1] * point->data[0] + matrix->data[5] * point->data[1] + matrix->data[9] * point->data[2];
+	output->data[2] = matrix->data[2] * point->data[0] + matrix->data[6] * point->data[1] + matrix->data[10] * point->data[2];
+
+	return output;
+}
+
+Vec3f* Utils_TransformPoint_Mutable(const Mat4f *matrix, Vec3f *point) {
+	Vec3f temp;
+	Utils_TransformPoint(matrix, point, &temp);
+	Utils_Vector3_Copy(point, &temp);
+
+	return point;
 }

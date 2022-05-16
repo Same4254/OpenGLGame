@@ -1,76 +1,72 @@
 #include "Rendering/Rendering.h"
 
-void Rendering_Camera_CopyDirectionVectors(Camera *camera, const Vec3f *right, const Vec3f *up, const Vec3f *front) {
-	camera->rotation.data[MAT4_COL_1 + 0] = right->data[0];
-	camera->rotation.data[MAT4_COL_1 + 1] = up->data[0];
-	camera->rotation.data[MAT4_COL_1 + 2] = front->data[0];
-
-	camera->rotation.data[MAT4_COL_2 + 0] = right->data[1];
-	camera->rotation.data[MAT4_COL_2 + 1] = up->data[1];
-	camera->rotation.data[MAT4_COL_2 + 2] = front->data[1];
-
-	camera->rotation.data[MAT4_COL_3 + 0] = right->data[2];
-	camera->rotation.data[MAT4_COL_3 + 1] = up->data[2];
-	camera->rotation.data[MAT4_COL_3 + 2] = front->data[2];
-}
-
 void Rendering_Camera_Initialize(Camera *camera) {
-	Utils_Matrix4_Identity_Mutable(&camera->rotation);
-	Utils_Matrix4_Identity_Mutable(&camera->translation);
+	Utils_Vector3_SetAll(&camera->rotation, 0);
+	Utils_Vector3_SetAll(&camera->translation, 0);
 }
 
-void Rendering_Camera_SetTranslation(Camera *camera, const Vec3f *position) {
-	Vec3f inverted;
-	Utils_Vector3_Scale(position, -1.0f, &inverted);
+void Rendering_Camera_TranslateInFacingDirection(Camera *camera, const Vec3f *offset) {
+	Mat4f rotation;
+	Utils_Matrix4_Identity_Mutable(&rotation);
 
-	Utils_Copy_Mutable(&(camera->translation.data[MAT4_COL_4]), inverted.data, VEC3_LENGTH);
+	Vec3f xAxis = { 1.0f, 0.0f, 0.0f };
+	Vec3f yAxis = { 0.0f, 1.0f, 0.0f };
+	Vec3f zAxis = { 0.0f, 0.0f, 1.0f };
+
+	Utils_Matrix4_Rotate_Mutable(&rotation, &xAxis, -camera->rotation.x);
+	Utils_Matrix4_Rotate_Mutable(&rotation, &yAxis, -camera->rotation.y);
+	Utils_Matrix4_Rotate_Mutable(&rotation, &zAxis, -camera->rotation.z);
+
+	Vec3f temp;
+	Utils_TransformPoint(&rotation, offset, &temp);
+
+	Utils_Vector3_Add_Mutable(&camera->translation, &temp);
 }
 
-void Rendering_Camera_Translate(Camera *camera, const Vec3f *offset) {
-	Utils_Add_Mutable(&(camera->translation.data[MAT4_COL_4]), offset->data, VEC3_LENGTH);
-}
+void Rendering_Camera_TranslateInFacingDirection_NoPitch(Camera *camera, const Vec3f *offset) {
+	Mat4f rotation;
+	Utils_Matrix4_Identity_Mutable(&rotation);
 
-void Rendering_Camera_SetRotation(Camera *camera, float pitch, float yaw) {
-	yaw = Utils_DegreesToRadians(yaw);
-	pitch = Utils_DegreesToRadians(pitch);
+	Vec3f xAxis = { 1.0f, 0.0f, 0.0f };
+	Vec3f yAxis = { 0.0f, 1.0f, 0.0f };
+	Vec3f zAxis = { 0.0f, 0.0f, 1.0f };
 
-	Vec3f front = {
-		cosf(yaw) * cosf(pitch),
-		sinf(pitch),
-		sinf(yaw) * cos(pitch)
-	};
-	Utils_Vector3_Normalize_Mutable(&front);
+	Utils_Matrix4_Rotate_Mutable(&rotation, &yAxis, -camera->rotation.y);
 
-	Vec3f worldUp = { 0.0f, 1.0f, 0.0f };
+	Vec3f temp;
+	Utils_TransformPoint(&rotation, offset, &temp);
 
-	Vec3f right;
-	Utils_Vector3_Cross(&worldUp, &front, &right);
-	Utils_Vector3_Normalize_Mutable(&right);
-
-	Vec3f up;
-	Utils_Vector3_Cross(&front, &right, &up);
-	Utils_Vector3_Normalize_Mutable(&up);
-
-	Rendering_Camera_CopyDirectionVectors(camera, &right, &up, &front);
+	Utils_Vector3_Add_Mutable(&camera->translation, &temp);
 }
 
 void Rendering_Camera_LookAtTarget(Camera *camera, const Vec3f *target) {
-	Vec3f front;
-	Utils_Subtract(&camera->translation.data[MAT4_COL_4], target->data, front.data, VEC3_LENGTH);
-	Utils_Vector3_Normalize_Mutable(&front);
+	//float xDiff = camera->translation.x - target->x;
+	//float zDiff = camera->translation.z - target->z;
+	//float zDiff = camera->translation.y - target->y;
 
-	Vec3f worldUp = { 0.0f, 1.0f, 0.0f };
-	Vec3f right;
-	Utils_Vector3_Cross(&worldUp, &front, &right);
-	Utils_Vector3_Normalize_Mutable(&right);
+	Vec3f difference;
+	Utils_Vector3_Subtract(&camera->translation, target, &difference);
 
-	Vec3f up;
-	Utils_Vector3_Cross(&front, &right, &up);
-	Utils_Vector3_Normalize_Mutable(&up);
-
-	Rendering_Camera_CopyDirectionVectors(camera, &right, &up, &front);
+	//camera->rotation.y = Utils_CorrectATan(zDiff, xDiff);
+	camera->rotation.y = atan2f(difference.z, difference.x) - Utils_DegreesToRadians(90);
+	camera->rotation.x = asinf(difference.y / Utils_Vector3_Magnitude(&difference));
 }
 
 void Rendering_Camera_CalculateViewMatrix(Mat4f *view, Camera *camera) {
-	Utils_Matrix4_Multiply(&camera->rotation, &camera->translation, view);
+	Mat4f rotation;
+	Utils_Matrix4_Identity_Mutable(&rotation);
+
+	Vec3f xAxis = { 1.0f, 0.0f, 0.0f };
+	Vec3f yAxis = { 0.0f, 1.0f, 0.0f };
+	Vec3f zAxis = { 0.0f, 0.0f, 1.0f };
+
+	Utils_Matrix4_Rotate_Mutable(&rotation, &xAxis, camera->rotation.x);
+	Utils_Matrix4_Rotate_Mutable(&rotation, &yAxis, camera->rotation.y);
+	Utils_Matrix4_Rotate_Mutable(&rotation, &zAxis, camera->rotation.z);
+
+	Mat4f translation;
+	Utils_Matrix4_Identity_Mutable(&translation);
+	Utils_Copy_Mutable(&translation.data[MAT4_COL_4], camera->translation.data, VEC3_LENGTH);
+
+	Utils_Matrix4_Multiply(&rotation, &translation, view);
 }
