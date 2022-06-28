@@ -34,5 +34,9 @@ add_executable(OpenGLGame "src/OpenGLGame.c" "src/glad.c" "src/Utils/Utils.c" "s
 target_link_libraries (OpenGLGame ${OPENGL_LIBRARY} glfw glm)
 
 add_custom_target(copy-shaders ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Shaders/ ${PROJECT_BINARY_DIR}/Shaders
-    DEPENDS OpenGLGame)
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Shaders/ ${PROJECT_BINARY_DIR}/Shaders
+        DEPENDS OpenGLGame)
+
+add_custom_target(copy-test-assets ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/TestAssets ${PROJECT_BINARY_DIR}/TestAssets
+        DEPENDS OpenGLGame)

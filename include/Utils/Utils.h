@@ -130,3 +130,5 @@ extern Vec3f* Utils_TransformPoint_Mutable(const Mat4f *matrix, Vec3f *point);
 
 extern void* Utils_ReadFile(char *filePath);
 extern void* Utils_ReadFileTerminated(char *filePath);
+
+extern float* Utils_ReadPNG_RGB(char *filePath);

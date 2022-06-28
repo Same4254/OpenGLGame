@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+.ccls-cache/
+RelWithDebInfo/
+Debug/
+build/
+compile_commands.json
+
 # User-specific files
 *.rsuser
 *.suo

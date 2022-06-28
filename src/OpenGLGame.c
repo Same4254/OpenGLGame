@@ -1,9 +1,14 @@
 ﻿#include "OpenGLGame.h"
 
 Camera camera;
+Mat4f proj;
+int projectionLoc;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+	printf("Size Changed! %d, %d\n", width, height);
 	glViewport(0, 0, width, height);
+	Utils_Matrix4_CalculatePerspective(&proj, Utils_DegreesToRadians(25.0f), (float) width / (float) height, 0.1f, 100.0f);
+	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, proj.data);
 }
 
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
@@ -102,6 +107,8 @@ void processInput(GLFWwindow* window, Camera* camera, float dt) {
 }
 
 int main() {
+	Utils_ReadPNG_RGB("TestAssets/red");
+
 	if (!glfwInit())
 		return -1;
 
@@ -272,7 +279,6 @@ int main() {
 	//glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 	//Mat4f proj2 = Utils::perspectiveMatrix(Utils::degreesToRadians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-	Mat4f proj;
 	Utils_Matrix4_CalculatePerspective(&proj, Utils_DegreesToRadians(75.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	//glm::mat4 model = glm::mat4(1.0f);
@@ -308,7 +314,7 @@ int main() {
 	Utils_Matrix4_Identity_Mutable(&model);
 	Utils_Matrix4_Translate_Mutable(&model, &translation);
 
-	int projectionLoc = glGetUniformLocation(shader.programID, "projection");
+	projectionLoc = glGetUniformLocation(shader.programID, "projection");
 	int modelLoc = glGetUniformLocation(shader.programID, "model");
 	int viewLoc = glGetUniformLocation(shader.programID, "view");
 
