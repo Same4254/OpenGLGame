@@ -23,17 +23,17 @@
 #define MAT4_COL_4 12
 
 typedef union {
-	struct {
-		float x;
-		float y;
-		float z;
-	};
+    struct {
+        float x;
+        float y;
+        float z;
+    };
 
-	float data[VEC3_LENGTH];
+    float data[VEC3_LENGTH];
 } Vec3f;
 
 typedef struct {
-	float data[MAT4_LENGTH];
+    float data[MAT4_LENGTH];
 } Mat4f;
 
 //*************************** Math ***************************//
@@ -69,7 +69,7 @@ extern float* Utils_SetAll(float *m, float value, size_t length);
 //******* Vector 3 *******//
 
 extern float  Utils_Vector3_Dot(const Vec3f *v1, const Vec3f *v2);
-extern float  Utils_Vector3_Magnitude(const float *v);
+extern float  Utils_Vector3_Magnitude(const Vec3f *v);
 
 // Immutable
 
@@ -128,7 +128,14 @@ extern Vec3f* Utils_TransformPoint_Mutable(const Mat4f *matrix, Vec3f *point);
 
 //*************************** File I/O ***************************//
 
+typedef struct {
+    uint32_t width, height;
+    unsigned int nrChannels;
+    unsigned char *data;
+} Image;
+
 extern void* Utils_ReadFile(char *filePath);
 extern void* Utils_ReadFileTerminated(char *filePath);
 
-extern float* Utils_ReadPNG_RGB(char *filePath);
+extern uint32_t Utils_CRC32(const void *data, size_t data_length);
+extern Image Utils_LoadImage(const char *filePath);

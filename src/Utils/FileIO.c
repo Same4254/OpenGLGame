@@ -1,64 +1,75 @@
 #include "Utils/Utils.h"
+#include <arpa/inet.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utils/stb_image.h"
 
 void* Utils_ReadFile(char *filePath) {
-	char *buffer;
+    char *buffer;
 
-	FILE *fp = fopen(filePath, "rb");
+    FILE *fp = fopen(filePath, "rb");
 
-	if (fp) {
-		fseek(fp, 0, SEEK_END);
-		long fileByteLength = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
+    if (fp) {
+        fseek(fp, 0, SEEK_END);
+        long fileByteLength = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
 
-		buffer = malloc(fileByteLength);
-		fread(buffer, 1, fileByteLength, fp);
+        buffer = malloc(fileByteLength);
+        fread(buffer, 1, fileByteLength, fp);
 
-		fclose(fp);
-		return buffer;
-	}
+        fclose(fp);
+        return buffer;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 void* Utils_ReadFileTerminated(char *filePath) {
-	char *buffer;
+    char *buffer;
 
-	FILE *fp = fopen(filePath, "rb");
+    FILE *fp = fopen(filePath, "rb");
 
-	if (fp) {
-		fseek(fp, 0, SEEK_END);
-		long fileByteLength = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
+    if (fp) {
+        fseek(fp, 0, SEEK_END);
+        long fileByteLength = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
 
-		buffer = malloc(fileByteLength + 1);
-		fread(buffer, 1, fileByteLength, fp);
-		buffer[fileByteLength] = '\0';
+        buffer = malloc(fileByteLength + 1);
+        fread(buffer, 1, fileByteLength, fp);
+        buffer[fileByteLength] = '\0';
 
-		fclose(fp);
-		return buffer;
-	}
+        fclose(fp);
+        return buffer;
+    }
 
-	return NULL;
+    return NULL;
 }
 
-typedef struct {
-	uint32_t width;
-	uint32_t height;
-	uint8_t bitDepth;
-	uint8_t colorType;
-	uint8_t compressionType;
-	uint8_t filterMethod;
-	uint8_t interlaceMethod;
-} IHDR_Chunk;
+uint32_t Utils_CRC32(const void *data, size_t data_length) {
+    // initial value
+    uint32_t crc = 0xFFFFFFFF;
+    const uint32_t polynomial = 0x04C11DB7;
+    
+    for (size_t i = 0; i < data_length; i++) {
+        crc ^= (((uint8_t*) data)[i]) << 24;
 
-float* Utils_ReadPNG_RGB(char *filePath) {
-	void *fileContents = Utils_ReadFileTerminated(filePath);
+        // essentially using demorgans law to postpone the XOR with the next byte until we get there
+        for (size_t j = 0; j < 8; j++) {
+            if (crc & (1 << 31))
+                crc = (crc << 1) ^ polynomial;
+            else
+                crc = (crc << 1);
+        }
+    }
 
-	if(((uint64_t*) fileContents)[0] != 1196314761) {
-		// Error
-		printf("Parsing PNG as RGB failed. Magic number is incorrect: %s\n", filePath);
-	}
+    //invert at the end
+    return ~crc;
+}
 
-	//Chunk headerChunk;
-	
+Image Utils_LoadImage(const char *filePath) {
+    Image image;
+    unsigned char *data = stbi_load("container.jpg", &image.width, &image.height, &image.nrChannels, 0); 
+    image.data = data;
+
+    return image;
 }

@@ -2,7 +2,7 @@
 
 void Rendering_Shader_Initialize(Shader *shader, char *vertexShaderPath, char *fragmentShaderPath) {
 	shader->vertexShaderPath = strdup(vertexShaderPath);
-	shader->vertexShaderPath = strdup(fragmentShaderPath);
+	shader->fragmentShaderPath = strdup(fragmentShaderPath);
 
 	char *vertexShaderSource = Utils_ReadFileTerminated(vertexShaderPath);
 	char *fragmentShaderSource = Utils_ReadFileTerminated(fragmentShaderPath);

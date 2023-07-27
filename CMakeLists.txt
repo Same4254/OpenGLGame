@@ -27,11 +27,19 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
+FetchContent_Declare(
+  assimp
+  GIT_REPOSITORY "https://github.com/assimp/assimp.git"
+  GIT_TAG        "v5.2.5"
+  UPDATE_COMMAND  ""
+)
+FetchContent_MakeAvailable(assimp)
+
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-add_executable(OpenGLGame "src/OpenGLGame.c" "src/glad.c" "src/Utils/Utils.c" "src/Utils/Matrix.c" "src/Rendering/Shader.c" "src/Utils/FileIO.c" "src/Rendering/Camera.c")
+add_executable(OpenGLGame "src/OpenGLGame.c" "src/glad.c" "src/Utils/Utils.c" "src/Utils/Matrix.c" "src/Rendering/Shader.c" "src/Utils/FileIO.c" "src/Rendering/Camera.c" "src/Rendering/Mesh.c")
 
-target_link_libraries (OpenGLGame ${OPENGL_LIBRARY} glfw glm)
+target_link_libraries (OpenGLGame ${OPENGL_LIBRARY} glfw glm assimp)
 
 add_custom_target(copy-shaders ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/Shaders/ ${PROJECT_BINARY_DIR}/Shaders
