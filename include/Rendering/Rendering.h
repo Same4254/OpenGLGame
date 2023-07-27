@@ -44,3 +44,10 @@ typedef struct {
 
     uint32_t VAO, VBO, EBO;
 } Mesh;
+
+typedef struct {
+    Mesh *meshes;
+    size_t length;
+} MeshList;
+
+extern MeshList Rendering_Utils_LoadOBJ(const char *filePath);

@@ -1,4 +1,5 @@
-﻿#include "OpenGLGame.h"
+﻿#define STB_IMAGE_IMPLEMENTATION
+#include "OpenGLGame.h"
 
 Camera camera;
 Mat4f proj;
@@ -193,7 +194,7 @@ int main() {
     // 1.0f,  1.0f, 1.0f, 0.5f, 0.5f, 0.5f,
     //};
 
-    float vertices[] = {
+    /*float vertices[] = {
         0.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,
         0.0f, 1.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,
         1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,
@@ -241,10 +242,10 @@ int main() {
         1.0f, 0.0f, 0.0f,  0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,
         1.0f, 1.0f, 0.0f,  0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,
         1.0f, 1.0f, 1.0f,  0.5f, 0.5f, 0.5f,  1.0f, 0.0f, 0.0f,
-    };
+    };*/
 
     //Shader shader("Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
-    Shader shader;
+    /*Shader shader;
     Rendering_Shader_Initialize(&shader, "Shaders/LightingShader.vert", "Shaders/LightingShader.frag");
 
     unsigned int VBO;
@@ -265,9 +266,12 @@ int main() {
     glEnableVertexAttribArray(1);
 
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(2);*/
 
-    Mesh mesh;
+    Shader shader;
+    Rendering_Shader_Initialize(&shader, "Shaders/MeshShader.vert", "Shaders/MeshShader.frag");
+
+    MeshList meshes = Rendering_Utils_LoadOBJ("TestAssets/car.obj");
 
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
     //glBindVertexArray(0);
@@ -356,7 +360,7 @@ int main() {
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, view.data);
 
         //shader.Use();
-        glUseProgram(shader.programID);
+        //glUseProgram(shader.programID);
 
         //model = glm::rotate(model, glm::radians(-100.0f * deltaTime), glm::vec3(1.0f, 0.0f, 1.0f));
         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -368,8 +372,15 @@ int main() {
         //Utils_Matrix4_Rotate_Mutable(&model, &axis, Utils_DegreesToRadians(-20.0f * deltaTime));
         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glBindVertexArray(VAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glUseProgram(shader.programID);
+        for (size_t i = 0; i < meshes.length; i++) {
+            glBindVertexArray(meshes.meshes[i].VAO);
+            //glDrawArrays(GL_TRIANGLES, 0, meshes.meshes[i].index_length);
+            glDrawElements(GL_TRIANGLES, meshes.meshes[i].index_length, GL_UNSIGNED_INT, 0);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -139,3 +139,4 @@ extern void* Utils_ReadFileTerminated(char *filePath);
 
 extern uint32_t Utils_CRC32(const void *data, size_t data_length);
 extern Image Utils_LoadImage(const char *filePath);
+
