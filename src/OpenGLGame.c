@@ -326,7 +326,7 @@ int main() {
     //shader.Use();
     glUseProgram(shader.programID);
 
-    Vec3f lightPos = { 2.0f, 3.0f, 0.0f };
+    Vec3f lightPos = { 10.0f, 10.0f, 10.0f };
     Vec3f lightColor = { 1.0f,1.0f, 0.7f };
 
     //glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(proj));
@@ -378,8 +378,9 @@ int main() {
         glUseProgram(shader.programID);
         for (size_t i = 0; i < meshes.length; i++) {
             glBindVertexArray(meshes.meshes[i].VAO);
-            //glDrawArrays(GL_TRIANGLES, 0, meshes.meshes[i].index_length);
-            glDrawElements(GL_TRIANGLES, meshes.meshes[i].index_length, GL_UNSIGNED_INT, 0);
+            // glDrawArrays(GL_TRIANGLES, 0, meshes.meshes[i].vertex_length);
+            // glDrawElements(GL_TRIANGLES, meshes.meshes[i].index_length, GL_UNSIGNED_INT, meshes.meshes[i].indices);
+            glDrawElements(GL_TRIANGLES, meshes.meshes[i].index_length, GL_UNSIGNED_INT, NULL);
         }
 
         glfwSwapBuffers(window);

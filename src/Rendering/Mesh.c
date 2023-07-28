@@ -12,7 +12,7 @@ void Mesh_GenBuffers(Mesh *mesh) {
     glBindVertexArray(mesh->VAO);
     {
         glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-        glBufferData(GL_ARRAY_BUFFER, mesh->vertex_length * sizeof(Vec3f), mesh->verticies, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh->vertex_length * sizeof(Mesh_Vertex), mesh->verticies, GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->index_length * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
@@ -53,6 +53,10 @@ Mesh* ProcessNode_Load(Mesh *list, struct aiNode *node, const struct aiScene *sc
         for (size_t face_index = 0; face_index < ai->mNumFaces; face_index++) {
             list->index_length += ai->mFaces[face_index].mNumIndices;
         }
+
+        printf("Num Verticies: %d\n", list->vertex_length);
+        printf("Num Indecies: %d\n", list->index_length);
+        printf("Num Faces: %d\n", ai->mNumFaces);
 
         list->indices = calloc(list->index_length, sizeof(*list->indices));
         size_t index = 0;
