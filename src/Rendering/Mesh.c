@@ -77,7 +77,7 @@ Mesh* ProcessNode_Load(Mesh *list, struct aiNode *node, const struct aiScene *sc
     return list;
 }
 
-MeshList Rendering_Utils_LoadOBJ(const char *filePath) {
+void Rendering_Utils_LoadOBJ(const char *filePath, MeshList *mesh_list) {
     const struct aiScene *scene = aiImportFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (scene == NULL || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -85,14 +85,32 @@ MeshList Rendering_Utils_LoadOBJ(const char *filePath) {
         printf("%s\n", aiGetErrorString());
     }
 
-    MeshList list;
-    list.length = scene->mNumMeshes;
-    list.meshes = calloc(list.length, sizeof(*list.meshes));
+    mesh_list->length = scene->mNumMeshes;
+    mesh_list->meshes = calloc(mesh_list->length, sizeof(*mesh_list->meshes));
 
-    ProcessNode_Load(list.meshes, scene->mRootNode, scene);
-    for (size_t i = 0; i < list.length; i++) {
-        Mesh_GenBuffers(&list.meshes[i]);
+    ProcessNode_Load(mesh_list->meshes, scene->mRootNode, scene);
+    for (size_t i = 0; i < mesh_list->length; i++) {
+        Mesh_GenBuffers(&mesh_list->meshes[i]);
     }
+}
 
-    return list;
+void Rendering_Test_Perspective_GenerateBuffer(const Perspective_Buffers *buff, const float *verticies, const size_t length) {
+    glGenBuffers(1, &buff->VBO);
+    glGenVertexArrays(1, &buff->VAO);
+
+    glBindVertexArray(buff->VAO);
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, buff->VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(*verticies) * length, verticies, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+
+        //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+        //glEnableVertexAttribArray(2);
+    }
+    glBindVertexArray(0);
 }

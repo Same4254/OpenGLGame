@@ -56,3 +56,22 @@ void Rendering_Shader_FreeContent(Shader *shader) {
 	free(shader->vertexShaderPath);
 	free(shader->fragmentShaderPath);
 }
+
+void Rendering_Shader_PerspectiveShader_Initialize(Perspective_Shader *shader, char *vertexShaderPath, char *fragmentShaderPath) {
+	Rendering_Shader_Initialize(&shader->base_shader, vertexShaderPath, fragmentShaderPath);
+
+	shader->projection_loc = glGetUniformLocation(shader->base_shader.programID, "projection");
+	shader->model_loc      = glGetUniformLocation(shader->base_shader.programID, "model");
+	shader->view_loc       = glGetUniformLocation(shader->base_shader.programID, "view");
+}
+
+void Rendering_Shader_MeshShader_Initialize(Mesh_Shader *shader, char *vertexShaderPath, char *fragmentShaderPath) {
+	Rendering_Shader_Initialize(&shader->base_shader, vertexShaderPath, fragmentShaderPath);
+
+	shader->projection_loc  = glGetUniformLocation(shader->base_shader.programID, "projection");
+	shader->model_loc       = glGetUniformLocation(shader->base_shader.programID, "model");
+	shader->view_loc        = glGetUniformLocation(shader->base_shader.programID, "view");
+
+	shader->light_pos_loc   = glGetUniformLocation(shader->base_shader.programID, "lightPos");
+	shader->light_color_loc = glGetUniformLocation(shader->base_shader.programID, "lightColor");
+}
