@@ -94,7 +94,7 @@ void Rendering_Utils_LoadOBJ(const char *filePath, MeshList *mesh_list) {
     }
 }
 
-void Rendering_Test_Perspective_GenerateBuffer(const Perspective_Buffers *buff, const float *verticies, const size_t length) {
+void Rendering_Test_Perspective_GenerateBuffer(Perspective_Buffers *buff, const float *verticies, const size_t length) {
     glGenBuffers(1, &buff->VBO);
     glGenVertexArrays(1, &buff->VAO);
 

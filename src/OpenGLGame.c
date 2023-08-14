@@ -222,6 +222,9 @@ int main() {
     Rendering_Test_Perspective_GenerateBuffer(&cube.buff, test_cube_verticies, sizeof(test_cube_verticies));
     Utils_Matrix4_Identity_Mutable(&cube.model_mat);
 
+    Vec3f translation = { 0.0f, 0.0f, 0.0f };
+    Utils_Matrix4_Translate_Mutable(&cube.model_mat, &translation);
+
     // Car
     Rendering_Shader_MeshShader_Initialize(&model_shader, "Shaders/MeshShader.vert", "Shaders/MeshShader.frag");
 
@@ -270,36 +273,25 @@ int main() {
         Rendering_Camera_CalculateViewMatrix(&view, &camera);
 
         glUseProgram(cube_shader.base_shader.programID);
+
+        glUniformMatrix4fv(cube_shader.projection_loc, 1, GL_FALSE, proj.data);
+        glUniformMatrix4fv(cube_shader.model_loc, 1, GL_FALSE, cube.model_mat.data);
         glUniformMatrix4fv(cube_shader.view_loc, 1, GL_FALSE, view.data);
 
-        glUseProgram(model_shader.base_shader.programID);
-        glUniformMatrix4fv(model_shader.view_loc, 1, GL_FALSE, view.data);
-
-        glUseProgram(cube_shader.base_shader.programID);
         glBindVertexArray(cube.buff.VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        //shader.Use();
-        //glUseProgram(shader.programID);
-
-        //model = glm::rotate(model, glm::radians(-100.0f * deltaTime), glm::vec3(1.0f, 0.0f, 1.0f));
-        //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        //model = Utils::rotate(model, { 1.0f, 0.0f, 1.0f }, Utils::degreesToRadians(-20.0f * deltaTime));
-        //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data());
-
-        //Vec3f axis = { 1.0f, 0.0f, 1.0f };
-        //Utils_Matrix4_Rotate_Mutable(&model, &axis, Utils_DegreesToRadians(-20.0f * deltaTime));
-        //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, model.data);
-
-        //glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        // model
         glUseProgram(model_shader.base_shader.programID);
+
+        glUniformMatrix4fv(model_shader.projection_loc, 1, GL_FALSE, proj.data);
+        glUniformMatrix4fv(model_shader.model_loc, 1, GL_FALSE, car.model_mat.data);
+        glUniformMatrix4fv(model_shader.view_loc, 1, GL_FALSE, view.data);
+        glUniform3fv(model_shader.light_pos_loc, 1, lightPos.data);
+        glUniform3fv(model_shader.light_color_loc, 1, lightColor.data);
+
         for (size_t i = 0; i < car.mesh_list.length; i++) {
             glBindVertexArray(car.mesh_list.meshes[i].VAO);
-            // glDrawArrays(GL_TRIANGLES, 0, meshes.meshes[i].vertex_length);
-            // glDrawElements(GL_TRIANGLES, meshes.meshes[i].index_length, GL_UNSIGNED_INT, meshes.meshes[i].indices);
             glDrawElements(GL_TRIANGLES, car.mesh_list.meshes[i].index_length, GL_UNSIGNED_INT, NULL);
         }
 
@@ -309,7 +301,7 @@ int main() {
 
     glfwTerminate();
 
-    Rendering_Shader_FreeContent(&model_shader);
+    // Rendering_Shader_FreeContent(&model_shader);
 
     return 0;
 }

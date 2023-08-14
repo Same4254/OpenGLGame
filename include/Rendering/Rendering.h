@@ -61,7 +61,7 @@ typedef struct {
     Mat4f model_mat;
 } Perspective_TestCube;
 
-extern void Rendering_Test_Perspective_GenerateBuffer(const Perspective_Buffers *buff, const float *verticies, const size_t length);
+extern void Rendering_Test_Perspective_GenerateBuffer(Perspective_Buffers *buff, const float *verticies, const size_t length);
 
 typedef struct {
     Vec3f position;
